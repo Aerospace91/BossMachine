@@ -16,7 +16,7 @@ apiRouter.get('/minions', (req, res, next) => {
     res.status(200).send(minions)
 })
 
-apiRouter.post('/minions'. (req, res, next) => {
+apiRouter.post('/minions', (req, res, next) => {
     res.status(501).send("Not Implemented")
 })
 
