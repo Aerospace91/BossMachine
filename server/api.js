@@ -21,7 +21,14 @@ apiRouter.post('/minions', (req, res, next) => {
 })
 
 apiRouter.get('/minions/:minionId', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const minionId = req.params.minionId
+    const minion = getFromDatabaseById('minions', minionId)
+
+    if (minion){
+        res.status(200).send(minion)
+    } else {
+        res.status(404).send('Minion not found')
+    }
 })
 
 apiRouter.put('/minions/:minionId', (req, res, next) => {
