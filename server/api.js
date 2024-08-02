@@ -136,7 +136,7 @@ apiRouter.delete('/ideas/:ideaId', (req, res, next) => {
     if (!validateId(ideaId)) {
         return res.status(404).send("Invalid Idea ID")
     }
-    
+
     const deleted = deleteFromDatabasebyId('ideas', ideaId);
 
 
@@ -154,11 +154,23 @@ apiRouter.get('/meetings', (req, res, next) => {
 })
 
 apiRouter.post('/meetings', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const newMeeting = createMeeting()
+
+    const addedMeeting = addToDatabase('meetings', newMeeting)
+    if (addedMeeting) {
+        res.status(201).send(addedMeeting)
+    } else {
+        res.status(400).send("Failed")
+    }
 })
 
 apiRouter.delete('/meetings', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const deleted = deleteAllFromDatabase('meetings')
+    if(deleted){
+        res.status(204).send()
+    } else {
+        res.status(404).send("Error")
+    }
 })
 
 
