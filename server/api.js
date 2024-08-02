@@ -66,7 +66,18 @@ apiRouter.put('/minions/:minionId', (req, res, next) => {
 })
 
 apiRouter.delete('/minions/:minionId', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const minionId = req.params.minionId;
+    if (isNaN(minionId)) {
+        return res.status(404).send("Invalid Minion ID");
+    }
+
+    const deleted = deleteFromDatabasebyId('minions', minionId);
+
+    if (deleted) {
+        res.status(204).send()
+    } else {
+        res.status(404).send("Minion not found")
+    }
 })
 
 //Ideas Routes
