@@ -10,6 +10,9 @@ const {
   deleteAllFromDatabase,
 } = require('./db.js');
 
+const checkMillionDollarIdea = require('./checkMillionDollarIdea.js');
+const { validate } = require('webpack');
+
 const validateMinion = (minion) => {
     const isCorrectType = typeof minion.name === 'string' &&
                           typeof minion.title === 'string' &&
@@ -33,7 +36,7 @@ const validateIdea = (idea) => {
 }
 
 const validateId = (id) => {
-    return !isNaN(id);
+    return Number.isInteger(Number(id)) && Number(id) > 0;
 }
 
 //Minions Routes
@@ -97,15 +100,23 @@ apiRouter.get('/ideas', (req, res, next) => {
     res.status(200).send(ideas)
 })
 
-apiRouter.post('/ideas', (req, res, next) => {
+apiRouter.post('/ideas', checkMillionDollarIdea, (req, res, next) => {
     const idea = req.body
 
+    if(validateIdea(idea)) {
+        const addedIdea = addToDatabase('ideas', idea);
+        res.status(201).send(addedIdea);
+    } else {
+        res.status(400).send("Incorrect Information")
+    }
+    /*
     if (validateIdea(idea)) {
         const addedIdea = addToDatabase('ideas', idea)
         res.status(201).send(addedIdea)
     } else {
         res.status(400).send("Incorrect Information")
     }
+    */
 })
 
 apiRouter.get('/ideas/:ideaId', (req, res, next) => {
@@ -120,8 +131,15 @@ apiRouter.get('/ideas/:ideaId', (req, res, next) => {
 })
 
 apiRouter.put('/ideas/:ideaId', (req, res, next) => {
+    const ideaId = req.params.ideaId;
+
+    //Validate
+    if (!validateId(ideaId)) {
+        return res.status(404).send("Invalid")
+    }
+
     const idea = req.body
-    idea.id = req.params.ideaId
+    idea.id = ideaId
 
     if (validateIdea(idea)) {
         const updatedIdea = updateInstanceInDatabase('ideas', idea)
@@ -129,7 +147,7 @@ apiRouter.put('/ideas/:ideaId', (req, res, next) => {
     } else {
         res.status(404).send()
     }
-})
+});
 
 apiRouter.delete('/ideas/:ideaId', (req, res, next) => {
     const ideaId = req.params.ideaId;
