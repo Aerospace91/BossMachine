@@ -10,6 +10,21 @@ const {
   deleteAllFromDatabase,
 } = require('./db.js');
 
+const validateMinion = (minion) => {
+    const isCorrectType = typeof minion.name === 'string' &&
+                          typeof minion.title === 'string' &&
+                          typeof minion.weaknesses === 'string' &&
+                          typeof minion.salary === 'number';
+    
+    const isValid = minion.salary >= 0;
+
+    return isCorrectType && isValid
+}
+
+const validateMinionId = (minionId) => {
+    return !isNaN(minionId);
+}
+
 //Minions Routes
 apiRouter.get('/minions', (req, res, next) => {
     const minions = getAllFromDatabase('minions');
@@ -19,16 +34,9 @@ apiRouter.get('/minions', (req, res, next) => {
 apiRouter.post('/minions', (req, res, next) => {
     const minion = req.body
 
-    const isCorrectType = typeof minion.name === 'string' &&
-                          typeof minion.title === 'string' &&
-                          typeof minion.weaknesses === 'string' &&
-                          typeof minion.salary === 'number';
-    
-    const isValid = minion.salary >= 0;
-
-    if(isCorrectType && isValid) {
-        addToDatabase('minions', minion)
-        res.status(201).send(minion)
+    if(validateMinion(minion)) {
+        const addedMinion = addToDatabase('minions', minion)
+        res.status(201).send(addedMinion)
     } else {
         res.status(400).send("Incorrect Information")
     }
@@ -47,19 +55,11 @@ apiRouter.get('/minions/:minionId', (req, res, next) => {
 
 apiRouter.put('/minions/:minionId', (req, res, next) => {
     const minion = req.body
-
-    const isCorrectType = typeof minion.name === 'string' &&
-                          typeof minion.title === 'string' &&
-                          typeof minion.weaknesses === 'string' &&
-                          typeof minion.salary === 'number';
-
-    const isValid = minion.salary >= 0;
-
     minion.id = req.params.minionId
 
-    if (isCorrectType && isValid) {
-        updateInstanceInDatabase('minions', minion)
-        res.status(200).send(minion)
+    if (validateMinion(minion)) {
+        const updatedMinion = updateInstanceInDatabase('minions', minion)
+        res.status(200).send(updatedMinion)
     } else {
         res.status(404).send()
     }
@@ -67,7 +67,7 @@ apiRouter.put('/minions/:minionId', (req, res, next) => {
 
 apiRouter.delete('/minions/:minionId', (req, res, next) => {
     const minionId = req.params.minionId;
-    if (isNaN(minionId)) {
+    if (!validateMinionId(minionId)) {
         return res.status(404).send("Invalid Minion ID");
     }
 
