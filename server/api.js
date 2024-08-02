@@ -17,7 +17,21 @@ apiRouter.get('/minions', (req, res, next) => {
 })
 
 apiRouter.post('/minions', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const minion = req.body
+    
+    const isCorrectType = typeof minion.name === 'string' &&
+                          typeof minion.title === 'string' &&
+                          typeof minion.weaknesses === 'string' &&
+                          typeof minion.salary === 'number';
+    
+    const isValid = minion.salary >= 0;
+
+    if(isCorrectType && isValid) {
+        addToDatabase('minions', minion)
+        res.status(201).send(minion)
+    } else {
+        res.status(400).send("Incorrect Information")
+    }
 })
 
 apiRouter.get('/minions/:minionId', (req, res, next) => {
