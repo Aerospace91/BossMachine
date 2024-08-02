@@ -21,8 +21,19 @@ const validateMinion = (minion) => {
     return isCorrectType && isValid
 }
 
-const validateMinionId = (minionId) => {
-    return !isNaN(minionId);
+const validateIdea = (idea) => {
+    const isCorrectType = typeof idea.name === 'string' &&
+                          typeof idea.description === 'string' &&
+                          typeof idea.numWeeks === 'number' &&
+                          typeof idea.weeklyRevenue === 'number';
+    
+    const isValid = idea.numWeeks >= 0 && idea.weeklyRevenue >= 0;
+
+    return isCorrectType && isValid
+}
+
+const validateId = (id) => {
+    return !isNaN(id);
 }
 
 //Minions Routes
@@ -67,7 +78,7 @@ apiRouter.put('/minions/:minionId', (req, res, next) => {
 
 apiRouter.delete('/minions/:minionId', (req, res, next) => {
     const minionId = req.params.minionId;
-    if (!validateMinionId(minionId)) {
+    if (!validateId(minionId)) {
         return res.status(404).send("Invalid Minion ID");
     }
 
@@ -87,19 +98,53 @@ apiRouter.get('/ideas', (req, res, next) => {
 })
 
 apiRouter.post('/ideas', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const idea = req.body
+
+    if (validateIdea(idea)) {
+        const addedIdea = addToDatabase('ideas', idea)
+        res.status(201).send(addedIdea)
+    } else {
+        res.status(400).send("Incorrect Information")
+    }
 })
 
 apiRouter.get('/ideas/:ideaId', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const ideaId = req.params.ideaId
+    const idea = getFromDatabaseById('ideas', ideaId)
+
+    if (idea) {
+        res.status(200).send(idea)
+    } else {
+        res.status(404).send('Idea not found')
+    }
 })
 
 apiRouter.put('/ideas/:ideaId', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+    const idea = req.body
+    idea.id = req.params.ideaId
+
+    if (validateIdea(idea)) {
+        const updatedIdea = updateInstanceInDatabase('ideas', idea)
+        res.status(200).send(updatedIdea)
+    } else {
+        res.status(404).send()
+    }
 })
 
-apiRouter.delete('/idea/:ideaId', (req, res, next) => {
-    res.status(501).send("Not Implemented")
+apiRouter.delete('/ideas/:ideaId', (req, res, next) => {
+    const ideaId = req.params.ideaId;
+    if (!validateId(ideaId)) {
+        return res.status(404).send("Invalid Idea ID")
+    }
+    
+    const deleted = deleteFromDatabasebyId('ideas', ideaId);
+
+
+    if (deleted) {
+        res.status(204).send()
+    } else {
+        res.status(404).send("Idea not found")
+    }
 })
 
 //Meeting Routes
